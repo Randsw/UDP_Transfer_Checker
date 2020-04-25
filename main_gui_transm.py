@@ -28,7 +28,7 @@ txt.pack(side='left', expand="yes", fill='x')
 f_south = tk.LabelFrame(text='Управление')
 f_south.pack(expand="yes", fill='both')
 
-f_net_param = tk.LabelFrame(f_south, text='Параметры сетевого соендинения')
+f_net_param = tk.LabelFrame(f_south, text='Параметры сетевого соединения')
 f_net_param.pack(expand="no")
 
 f_IP = tk.LabelFrame(f_net_param, text='IP адрес', labelanchor='n')
