@@ -14,7 +14,11 @@ class Transmitter:
     def send(self):
         addr = (self.ip, self.port)
         transm = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        #transm.connect(addr)
+        try:
+            transm.connect(addr)
+        except ConnectionRefusedError:
+            transm.close()
+            raise ConnectionRefusedError
         file_length = os.path.getsize(self.filename)
         datagram = os.path.basename(self.filename).encode('utf-8') + file_length.to_bytes(4, byteorder='big', signed=False)
         transm.sendto(datagram, addr)

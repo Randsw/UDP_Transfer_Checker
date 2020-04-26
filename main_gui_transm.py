@@ -21,9 +21,12 @@ def clicked_btn():
         try:
             sender.send()
         except ConnectionRefusedError:
+            txt.insert("insert", "Error" + '\n')
+            txt.insert("insert", "-" * 70 + '\n')
             messagebox.showinfo("Ошибка", "Удаленный компьютер не отвечает")
-        txt.insert("insert", "Done" + '\n')
-        txt.insert("insert", "-"*70 + '\n')
+        else:
+            txt.insert("insert", "Done" + '\n')
+            txt.insert("insert", "-"*70 + '\n')
     else:
         messagebox.showinfo("Ошибка", "Некоректные данные сетевого соединения или не выбран файл")
 
