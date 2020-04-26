@@ -4,23 +4,32 @@ from tkinter import filedialog
 from tkinter import messagebox
 import os
 import re
+from transmitter import Transmitter
 
 
 def clicked_btn():
     string = r'(25[0-5]|2[0-4][0-9]|[0]|[1]?[0-9][0-9]?)(\.(25[0-5]|2[0-4][0-9]|[0]|[1]?[0-9][0-9]?)){3}'
     ip = IP_entry.get()
-    port = port_spin.get()
-    buff_size = Buff_size_spin.get()
+    port = int(port_spin.get())
+    buff_size = int(Buff_size_spin.get())
     file_name = open_file_entry.get()
     if re.fullmatch(string, ip) and 10000 < int(port) < 65535 and 100 <= int(buff_size) <= 8958 and file_name:
-        txt.insert("insert", 'Sending {} to {} at port {}, UDP data size - {}'.format(os.path.basename(file_name), ip, port, buff_size) + '\n')
+        sender = Transmitter(ip, file_name, buff_size, port)
+        txt.insert("insert",
+                   'Sending {} to {} at port {}, UDP data size - {}'.format(os.path.basename(file_name), ip, port,
+                                                                            buff_size) + '\n')
+        try:
+            sender.send()
+        except ConnectionRefusedError:
+            messagebox.showinfo("Ошибка", "Удаленный компьютер не отвечает")
+        txt.insert("insert", "Done" + '\n')
+        txt.insert("insert", "-"*70 + '\n')
     else:
         messagebox.showinfo("Ошибка", "Некоректные данные сетевого соединения или не выбран файл")
 
 
 def clicked_open_file():
     file = filedialog.askopenfilename()
-    txt.insert("insert", os.path.basename(file) + '\n')
     open_file_entry.insert("insert", file)
     return file
 
@@ -43,6 +52,7 @@ f_net_param.pack(expand="no")
 f_IP = tk.LabelFrame(f_net_param, text='IP адрес', labelanchor='n')
 f_IP.pack(side='left', anchor='n')
 IP_entry = tk.Entry(f_IP, width=14)
+IP_entry.insert('end', '127.0.0.1')
 IP_entry.pack(side='bottom', padx=5, pady=5)
 
 
