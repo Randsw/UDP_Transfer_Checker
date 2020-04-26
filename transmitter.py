@@ -4,7 +4,15 @@ import os
 
 
 class Transmitter:
+    """
+    Transmitter Class
+    self.port - UDP port
+    self.filename - path to file wish to send
+    self.ip - destination ip
+    self.buff_size - payload data size in UDP datagram
 
+    method send() - send file to specified IP, port and with selected buffer_size
+    """
     def __init__(self, ip, filename, buff_size=8950, port=37777):
         self.port = port
         self.ip = ip
