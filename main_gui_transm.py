@@ -27,12 +27,14 @@ def clicked_btn():
         else:
             txt.insert("insert", "Done" + '\n')
             txt.insert("insert", "-"*70 + '\n')
+            open_file_entry.delete(0, 'end')
     else:
         messagebox.showinfo("Ошибка", "Некоректные данные сетевого соединения или не выбран файл")
 
 
 def clicked_open_file():
     file = filedialog.askopenfilename()
+    open_file_entry.delete(0, 'end')
     open_file_entry.insert("insert", file)
     return file
 
