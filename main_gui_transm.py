@@ -1,10 +1,21 @@
 import tkinter as tk
-import tkinter.scrolledtext as ScrolledText
+from tkinter import scrolledtext
 from tkinter import filedialog
 from tkinter import messagebox
+import tkinter.ttk as ttk
 import os
 import re
 from transmitter import Transmitter
+from queue import Queue
+from threading import Thread
+import time
+
+
+def check_queue():
+    time.sleep(0.01)
+    while queue.qsize():
+        Prog_bar_w["value"] = queue.get()
+        window.update()
 
 
 def clicked_btn():
@@ -13,21 +24,28 @@ def clicked_btn():
     port = int(port_spin.get())
     buff_size = int(Buff_size_spin.get())
     file_name = open_file_entry.get()
+    Prog_bar_w.configure(maximum=os.path.getsize(file_name) // buff_size)
     if re.fullmatch(string, ip) and 10000 < int(port) < 65535 and 100 <= int(buff_size) <= 8958 and file_name:
         sender = Transmitter(ip, file_name, buff_size, port)
+        t = Thread(target=sender.send, args=(queue,))
         txt.insert("insert",
                    'Sending {} to {} at port {}, UDP data size - {}'.format(os.path.basename(file_name), ip, port,
                                                                             buff_size) + '\n')
         try:
-            sender.send()
+            t.start()
+            check_queue()
         except ConnectionRefusedError:
             txt.insert("insert", "Error" + '\n')
             txt.insert("insert", "-" * 70 + '\n')
             messagebox.showinfo("Ошибка", "Удаленный компьютер не отвечает")
+            Prog_bar_w.stop()
+            Prog_bar_w["value"] = 0
         else:
             txt.insert("insert", "Done" + '\n')
-            txt.insert("insert", "-"*70 + '\n')
+            txt.insert("insert", "-" * 70 + '\n')
             open_file_entry.delete(0, 'end')
+            Prog_bar_w.stop()
+            Prog_bar_w["value"] = 0
     else:
         messagebox.showinfo("Ошибка", "Некоректные данные сетевого соединения или не выбран файл")
 
@@ -36,8 +54,9 @@ def clicked_open_file():
     file = filedialog.askopenfilename()
     open_file_entry.delete(0, 'end')
     open_file_entry.insert("insert", file)
-    return file
 
+
+queue = Queue()
 
 window = tk.Tk()
 window.title("UDP Packet Sender")
@@ -45,7 +64,7 @@ window.geometry('700x450')
 
 f_nw = tk.LabelFrame(text='Лог')
 f_nw.pack(expand="no", fill='x')
-txt = ScrolledText.ScrolledText(f_nw, width=80, height=12)
+txt = scrolledtext.ScrolledText(f_nw, width=80, height=12)
 txt.pack(side='left', expand="yes", fill='x')
 
 f_south = tk.LabelFrame(text='Управление')
@@ -59,7 +78,6 @@ f_IP.pack(side='left', anchor='n')
 IP_entry = tk.Entry(f_IP, width=14)
 IP_entry.insert('end', '127.0.0.1')
 IP_entry.pack(side='bottom', padx=5, pady=5)
-
 
 f_Port = tk.LabelFrame(f_net_param, text='Порт(10000-65535)', labelanchor='n')
 f_Port.pack(side='left', anchor='n')
@@ -84,5 +102,10 @@ btn_open_file.pack(side='left')
 
 btn = tk.Button(f_south, text="Отправить", command=clicked_btn)
 btn.pack(side='top')
+
+Prog_bar = tk.LabelFrame(f_south, text='Прогресс', labelanchor='n')
+Prog_bar.pack(side='top', anchor='n')
+Prog_bar_w = ttk.Progressbar(Prog_bar, orient="horizontal", length=500, mode="determinate", value=0)
+Prog_bar_w.pack(side='top')
 
 window.mainloop()
