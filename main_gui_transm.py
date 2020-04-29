@@ -31,18 +31,21 @@ def clicked_btn():
         txt.insert("insert",
                    'Sending {} to {} at port {}, UDP data size - {}'.format(os.path.basename(file_name), ip, port,
                                                                             buff_size) + '\n')
+        txt.yview('end')
         try:
             t.start()
             check_queue()
         except ConnectionRefusedError:
             txt.insert("insert", "Error" + '\n')
             txt.insert("insert", "-" * 70 + '\n')
+            txt.yview('end')
             messagebox.showinfo("Ошибка", "Удаленный компьютер не отвечает")
             Prog_bar_w.stop()
             Prog_bar_w["value"] = 0
         else:
             txt.insert("insert", "Done" + '\n')
             txt.insert("insert", "-" * 70 + '\n')
+            txt.yview('end')
             open_file_entry.delete(0, 'end')
             Prog_bar_w.stop()
             Prog_bar_w["value"] = 0
@@ -54,6 +57,7 @@ def clicked_open_file():
     file = filedialog.askopenfilename()
     open_file_entry.delete(0, 'end')
     open_file_entry.insert("insert", file)
+
 
 
 queue = Queue()
